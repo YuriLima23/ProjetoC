@@ -40,6 +40,21 @@ void listProntos()
     }
 }
 
+void listEspera()
+{
+    printf("Lista de Processos em Espera : \n");
+    if (espera[0].pid == 0)
+    {
+        espera[0] = espera[1];
+        espera[1] = espera[2];
+        espera[2] = vetAux[0];
+    }
+    for (int i = 0; i < 3; i++)
+    {
+        printf("Posição %d  PID: %ld \n", i, espera[i].pid);
+    }
+}
+
 void stateMode(Process p)
 {
 
@@ -57,6 +72,7 @@ void stateMode(Process p)
     if (strcmp(p.state, "e") == 0 || strcmp(p.state, "e") == 0)
     {
         printf("Processo pid : %ld Esta em Espera \n", p.pid);
+        listEspera();
     }
     if (strcmp(p.state, "n") == 0 || strcmp(p.state, "N") == 0)
     {
@@ -75,33 +91,20 @@ int sumProcessTime(Process p[3])
 }
 int listExec(int i)
 {
-
-    if ((exec.cpu1 - 1) == 0 || (exec.cpu1 - 1) < 0)
+    exec.cpu1 = exec.cpu1 - 1;
+    if (exec.cpu1 == 0 || exec.cpu1 < 0)
     {
-        printf("Processo PID : %ld esta FINALIZADO \n", exec.pid);
+        printf("\n \n Processo PID : %ld esta FINALIZADO \n \n ", exec.pid);
         return 1;
     }
     else
     {
-        printf("Processos na lista de execução : \n");
-        printf("PID: %ld  Tempo de execução : %d \n", exec.pid, exec.cpu1 - 1);
+        printf("\n Processos na lista de execução : \n");
+        printf("PID: %ld  Tempo de execução : %d \n \n", exec.pid, exec.cpu1);
         return 0;
     }
 }
-void listEspera()
-{
-    printf("Lista de Processos em Espera : \n");
-    if (espera[0].pid == 0)
-    {
-        espera[0] = espera[1];
-        espera[1] = espera[2];
-        espera[2] = vetAux[0];
-    }
-    for (int i = 0; i < 3; i++)
-    {
-        printf("Posição %d  PID: %ld \n", i, espera[i].pid);
-    }
-}
+
 
 void generatorTable(Process p[3])
 {
@@ -185,20 +188,45 @@ int main()
     printf("Processo do Sistema em execução \n");
     printf(" ================================================================ \n");
     int w = 0;
+    t = false;
     for (int i = 0; i < sumProcessTime(vet); i++)
     {
         if (i == vet[x].time && t == false)
         {
+            printf("Entrou um novo PID: \n");
+            if (pronto[0].pid == 0){
+                pronto[0] = vet[x];
+            }else if (pronto[1].pid == 0) {
+                 pronto[1] = vet[x];
+            }else{
+                 pronto[2] = vet[x];
+            }
             strcpy(vet[x].state, "p");
-            pronto[x] = vet[x];
             stateMode(pronto[x]);
+            listProntos();
             printf("\n \n ");
             (x == 2) ? x = 0 : x++;
             t = true;
         }
+        //tira dos prontos e inicia a execução
         if (t == true)
         {
             printf("Começou a execução \n");
+            //esse if é para colocar na lista de espera
+            if (exec.pid != 0){
+                if ( espera[0].pid == 0){
+                espera[0] = exec;
+                }else if (espera[1].pid == 0) {
+                  espera[1] = exec;
+                }else{
+                 pronto[2] = exec;
+                }
+                espera[w] = exec;
+                exec = vetAux[0];
+                strcpy(espera[w].state,"e");
+                stateMode(espera[w]);
+                (w == 2) ? w = 0 : w++;
+            }
             exec = pronto[0];
             pronto[0] = vetAux[0];
             strcpy(exec.state, "ex");
@@ -210,12 +238,14 @@ int main()
             }
             listProntos();
             t = false;
+           
         }
+        // segue a execução contando enquanto não entra um novo
         else
         {
             printf("Seguiu Processo \n");
-            int d = listExec(i);
-            if (d == 1)
+            int j = listExec(i);
+            if (j == 1)
             {
                 continue;
             }
