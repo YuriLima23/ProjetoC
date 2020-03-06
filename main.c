@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 // build table
 #define SEPARADOR -10
@@ -19,9 +20,11 @@ typedef struct
 
  Process espera[3];
  Process pronto[3];
+ Process exec;
+
 void stateMode(Process p)
 {
-     printf("ENTROIUUUUUUUUU : %ld \n",p.pid);
+    
     if ( strcmp(p.state, "p") == 0 || strcmp(p.state, "P") == 0)
     {
          printf("Processo pid : %ld Esta Pronto \n",p.pid );
@@ -56,6 +59,26 @@ void listProntos(){
       printf("Posição %d  PID: %ld \n",i,pronto[i].pid);
    }
 }
+ int listExec(int i){
+        if ((exec.cpu1 - i) == 0){
+            printf("Processo PID : %ld esta FINALIZADO \n", exec.pid);
+           return  1;
+        }else{
+            printf("Processos na lista de execução : \n");
+            printf("INTEIRO : %d \n" , i);
+            printf("PID: %ld  Tempo de execução : %d \n", exec.pid , exec.cpu1 - i );
+            return 0;
+        }
+            
+
+
+}
+void listEspera(){
+       printf("Lista de Processos em Espera : \n");
+   for (int i = 0; i < 3; i++){
+      printf("Posição %d  PID: %ld \n",i,espera[i].pid);
+   }
+}
 
 void generatorTable(Process p[3]){
   
@@ -75,7 +98,9 @@ int main()
     Process vet[3];
     
     int min = 100000;
-    int x = 0;
+    int x = 0,k=0;
+    bool t = false;
+    Process vetAux[3];
     Process p1, p2, p3, psAux;
 
     pronto[0] = p1;
@@ -124,34 +149,66 @@ int main()
     vet[2] = p3;
     generatorTable(vet);
 
-    // Find min Number
-    for (int i = 0; i <= 2; i++)
-    {
-        if (vet[i].time < min)
-        {
-            min = vet[i].pid;
-        }
-    }
+    // // Find min Number
+    // for (int i = 0; i <= 2; i++)
+    // {
+    //     if (vet[i].time < min)
+    //     {
+    //         min = vet[i].pid;
+    //     }
+    // }
    
 
-    // INICIO DA EXECUÇÃO
+    // start execute
     printf("Inciando Gerenciamento de Processos : \n");
     printf("Processo do Sistema em execução \n");
+    printf(" ================================================================ \n");
     
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < sumProcessTime(vet); i++)
     {
         if (i == vet[i].time){
-            printf("PID : %ld \n" , vet[i].pid);
-            strcpy(vet[i].state,"ex");
-            printf("Vetor : %s \n", vet[i].state);
-            pronto[0] = vet[i];
-            (x == 2 ) ? x = 0 : x++;
-            printf("Struct : %ld", pronto[x].pid);
+            strcpy(vet[i].state,"p");
+            pronto[x] = vet[i];
             stateMode(pronto[x]);
+
+            listProntos();
+            printf("\n \n ");
+            exec = pronto[0];
+            pronto[0] = vetAux[0];
+            
+            strcpy(exec.state,"ex");
+            stateMode(exec);
+            listProntos();
+            printf("\n \n ");
+            
+            (x == 2 ) ? x = 0 : x++;
+           t = true;
+            
         }
-        
+        if (t == false){
+            int d = listExec(i);
+            if(d == 1){
+                break;
+            }
+        }else{
+            
+            espera[k] = exec;
+            strcpy(espera[k].state,"e");
+            stateMode(espera[k]);
+            listProntos();
+            listEspera();
+            exec = pronto[0];
+            strcpy(exec.state,"ex");
+            stateMode(exec);
+            k++;
+            t = false;
+
+
+        }
+
 
     }
-    listProntos();
+   
+    
     
 }
