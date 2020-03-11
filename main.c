@@ -67,16 +67,19 @@ int insertPilha(Pilha *pi, Process p)
     }
 
     pi->p[pi->qtd] = p;
-    printf("PID : %ld Pronto \n \n", pi->p->pid);
+    printf("PID : %ld Pronto \n \n", pi->p[pi->qtd].pid);
     pi->qtd++;
     return 1;
 }
+//  ta removendo errado
 int removePilha(Pilha *pi)
 {
-    if (pi == NULL || pi->qtd == 0)
+    if (pi == NULL)
     {
         return 0;
     }
+    printf("AAAAAAAAAAA : %ld \n \n ", pi->p[pi->qtd].pid);
+
     pi->qtd--;
     return 1;
 }
@@ -151,6 +154,11 @@ void orderPosition()
         Pilha *prontos = createPilha();
         Pilha *espera = createPilha();
         Process p1, p2, p3, psAux;
+        psAux.pid =0;
+        psAux.time =0;
+        psAux.cpu1 =0;
+        psAux.cpu2 =0;
+
 
         p1.pid = rand() % 10000;
         p2.pid = rand() % 10000;
@@ -195,8 +203,6 @@ void orderPosition()
         vet[2] = p3;
         orderPosition(vet);
         generatorTable(vet);
-        exit;
-        printf("\n \n Esse é a ultima posição %ld \n \n ", vet[0].pid);
         // start execute
         printf("Inciando Gerenciamento de Processos : \n");
         printf("Processo do Sistema em execução \n");
@@ -204,35 +210,45 @@ void orderPosition()
 
         int x = 0;
         bool j = true;
-
+        exec = psAux;
         for (int i = 0; i < sumProcessTime(vet); i++)
         {
-            printf(" esse é o I : %d \n", i);
             if (vet[x].time == i)
             {
-                printf("ENTROUUUUUUU  :");
                 insertPilha(prontos, vet[x]);
                 listPilha(prontos);
-                if (exec.pid == 0)
+                if (x >= 2){
+                    x = 0;
+                    printf("zerou o x : %d \n \n ",x);
+                }else{
+                    x++;
+                     printf("SOMOU MAIs UM no x : %d \n \n ",x);
+                }
+                
+            }
+             if (exec.pid == psAux.pid)
                 {
                     exec = firstPositionPilha(prontos);
                     removePilha(prontos);
-                }
-                j = false;
-                (x == 3) ? x = 0 : x++;
-            }
-            if (exec.cpu1 != 0)
-            {
-                printf("O PID : %ld esta em execução Tempo : %d \n \n", exec.pid, exec.cpu1--);
-            }
-            if (exec.cpu1 <= 0)
-            {
-                listPilha(prontos);
-                printf("O PID : %ld esta FINALIZADO \n \n", exec.pid);
-                j = true;
-                exec = psAux;
-                continue;
-            }
-            break;
+                } 
+                    if (exec.cpu1 > 0){
+
+                        printf("O PID : %ld esta em execução Tempo : %d \n \n", exec.pid, exec.cpu1--);
+                        listPilha(prontos);
+                        j = true;
+                       
+                        }else{
+                            printf("O PID : %ld esta FINALIZADO \n \n", exec.pid);
+                            exec = psAux;  
+                            listPilha(prontos);
+                    }
+                    
+                     
+                   
+
+            
+           
+          
+           
         }
     }
