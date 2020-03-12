@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 // http://www.inf.ufg.br/~hebert/disc/aed1/AED1_09_Pilas.pdf pode ajudar ;
-//  https://www.cos.ufrj.br/~rfarias/cos121/pilhas.html
+//  https://www.cos.ufrj.br/~rfarias/cos121/filas.html
 // https://www.cprogressivo.net/2014/05/Filas-em-C-Como-Programar-Tutorial-Estrutura-de-Dados-Dinamica-Queue.html
 // build table
 #define SEPARADOR -10
@@ -22,86 +22,68 @@ typedef struct
 
 typedef struct
 {
-    int qtd;
+    int comeco;
+    int fim;
     Process p[3];
-} Pilha;
+} Fila;
 
-Pilha pilha;
 
 Process vet[3];
 
-Pilha *createPilha();
-void freePilha(Pilha *pi);
-Process firstPositionPilha();
-int insertPilha(Pilha *pi, Process p);
-int removePilha(Pilha *pi);
-void listPilha(Pilha *pi);
-int lengthPilha(Pilha *pi);
-
-int j = 0;
-
-Pilha *createPilha()
+Fila * createFila()
 {
-    Pilha *pi;
-    pi = (Pilha *)malloc(sizeof(Pilha));
-    if (pi != NULL)
-    {
-        pi->qtd = 0;
-    }
-    return pi;
+    Fila* fila = (Fila*) malloc(sizeof(Fila));
+    fila->comeco = 0;
+    fila->fim = -1;
+    return fila;
 }
-Process firstPositionPilha(Pilha *pi)
+Process firstPositionFila(Fila *fila)
 {
-    return pi->p[0];
+    int i = 0;
+    return fila->p[fila->comeco];
 }
 
-int insertPilha(Pilha *pi, Process p)
+void insertFila(Fila *fila, Process p)
 {
-    if (pi == NULL)
-    {
-        return 0;
-    }
-    if (pi->qtd == 3)
-    {
-        return 0;
-    }
-
-    pi->p[pi->qtd] = p;
-    printf("PID : %ld Pronto \n \n", pi->p[pi->qtd].pid);
-    pi->qtd++;
-    return 1;
+    if(fila->fim == 3 - 1)
+		printf("Fila está lotada, aguarde... \n");
+	else
+	{
+        
+		fila->fim++;
+		fila->p[fila->fim] = p;
+        printf("Um item foi inserido na fila \n \n ");
+	}
+    
 }
 //  ta removendo errado
-int removePilha(Pilha *pi)
+void removeFila(Fila *fila)
 {
-    if (pi == NULL)
-    {
-        return 0;
+    if(fila->fim < fila->comeco)
+		printf("fila Vazia\n");
+	else{
+        printf("UM elemento foi removido \n \n ");
+        fila->comeco++;
     }
-    printf("AAAAAAAAAAA : %ld \n \n ", pi->p[pi->qtd].pid);
 
-    pi->qtd--;
-    return 1;
-}
-int lengthPilha(Pilha *pi)
-{
-    if (pi == NULL)
-    {
-        return -1;
-    }
-    else
-    {
-        return pi->qtd;
-    }
+		
+  
 }
 
-void listPilha(Pilha *pi)
+void listFila(Fila *fila)
 {
     printf("Lista de Processos Pontos : \n");
-    for (int i = 0; i < pi->qtd; i++)
-    {
-        printf("Posição %d PID : %ld \n \n", i, pi->p[i].pid);
-    }
+   int i = 0;
+    	if(fila->fim < fila->comeco)
+		printf("fila Vazia \n");
+	else
+	{
+    		while(i < 3)
+		{
+			printf("Posicao : %d  PID :  %ld Esta Pronto :  \n", i,fila->p[i].pid);
+			i++;
+		}
+	}
 }
 
 int sumProcessTime(Process p[3])
@@ -151,8 +133,9 @@ void orderPosition()
 
         int min = 100000;
         bool t = false;
-        Pilha *prontos = createPilha();
-        Pilha *espera = createPilha();
+        Fila *prontos = createFila(); 
+        Fila *espera = createFila();
+       
         Process p1, p2, p3, psAux;
         psAux.pid =0;
         psAux.time =0;
@@ -210,45 +193,151 @@ void orderPosition()
 
         int x = 0;
         bool j = true;
+
+       
         exec = psAux;
         for (int i = 0; i < sumProcessTime(vet); i++)
         {
+           
             if (vet[x].time == i)
             {
-                insertPilha(prontos, vet[x]);
-                listPilha(prontos);
+                insertFila(prontos, vet[x]);
+                listFila(prontos);
+              
                 if (x >= 2){
                     x = 0;
-                    printf("zerou o x : %d \n \n ",x);
+                    
                 }else{
                     x++;
-                     printf("SOMOU MAIs UM no x : %d \n \n ",x);
+                    
                 }
                 
             }
              if (exec.pid == psAux.pid)
                 {
-                    exec = firstPositionPilha(prontos);
-                    removePilha(prontos);
+                    exec = firstPositionFila(prontos);
+                    removeFila(prontos);
                 } 
                     if (exec.cpu1 > 0){
 
                         printf("O PID : %ld esta em execução Tempo : %d \n \n", exec.pid, exec.cpu1--);
-                        listPilha(prontos);
+                        listFila(prontos);
                         j = true;
                        
                         }else{
                             printf("O PID : %ld esta FINALIZADO \n \n", exec.pid);
                             exec = psAux;  
-                            listPilha(prontos);
+                            listFila(prontos);
                     }
-                    
-                     
-                   
-
-            
-           
           
            
         }
     }
+
+
+/*
+Autor Marcio spents
+
+*/
+
+/*
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct no {
+   int valor;
+   struct no *proxptr;
+   };
+
+typedef struct no NO;
+typedef NO *NOPTR;
+
+void insere_fila(NOPTR *, NOPTR *, int);
+void retira_fila (NOPTR *, NOPTR *);
+void mostra_fila (NOPTR);
+
+
+int main(void)
+{
+   NOPTR inicio=NULL, fim=NULL;
+   int elemento=0;
+   int opcao=-1;
+
+   while (opcao != 0)
+         {
+printf ("\n\n1 - Insere elemento na fila");
+printf ("\n2 - Retira elemento da fila");
+printf ("\n3 - Mostra fila");
+printf ("\n0 - Encerra programa");
+printf ("\nOpcao ?");
+scanf ("%d", &opcao);
+switch (opcao)
+    {
+case 1:
+        printf ("\nInforme valor: ");
+scanf ("%d", &elemento);
+insere_fila(&inicio, &fim, elemento);
+mostra_fila(inicio);
+printf ("\n\n");
+break;
+case 2:
+retira_fila(&inicio, &fim);
+mostra_fila(inicio);
+printf ("\n\n");
+break;
+case 3:
+mostra_fila(inicio);
+printf ("\n\n");
+break;
+}
+}
+
+   return 1;
+}
+
+void insere_fila (NOPTR *inicio, NOPTR *fim,  int elemento)
+{
+NOPTR novo;
+
+novo = (NOPTR) malloc (sizeof (NO));
+novo->valor = elemento;
+novo->proxptr = NULL;
+
+    if (*inicio == NULL)
+*inicio = novo;
+else
+(*fim)->proxptr = novo;
+*fim = novo;
+}
+
+void retira_fila (NOPTR *inicio, NOPTR *fim)
+{
+NOPTR temp=NULL;
+    if (*inicio == NULL)
+     printf ("Fila esta vazia...");
+    else
+    {
+
+temp = *inicio;
+*inicio = (*inicio)->proxptr;
+if (*inicio == NULL)
+    *fim = NULL;
+
+    free(temp);
+    }
+}
+
+void mostra_fila (NOPTR corrente)
+{
+
+
+while (corrente != NULL  )
+    {
+printf ("%d --> ", corrente->valor);
+corrente = corrente->proxptr;
+}
+
+}
+*/
