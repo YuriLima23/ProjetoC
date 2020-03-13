@@ -23,7 +23,7 @@ typedef struct
 Process vet[3], psAux, vazio;
 
 
-Process prontos[3];
+Process espera[3],prontos[3];
 
 
 void listProntos()
@@ -31,7 +31,7 @@ void listProntos()
 
     for (int i = 0; i < 3; i++)
     {
-        printf("Posicao:  %d  PID : %ld \n \n ", i, prontos[i].pid);
+        printf("Posicao:  %d  PID : %ld esta Pronto \n \n ", i, prontos[i].pid);
     }
 }
 
@@ -43,7 +43,7 @@ void removePronto(){
         prontos[1] = prontos[2];
         prontos[2] = vazio;
     }
-    printf("Um Item FOI REMOVIDO : \n \n ");
+    printf("Um Item FOI REMOVIDO dos Prontos : \n \n ");
 
 }
 
@@ -65,6 +65,51 @@ void insertPronto(Process p){
 
 Process  getPrimeiroProcesso(){
     return prontos[0];
+}
+
+
+
+
+
+void listEspera()
+{
+
+    for (int i = 0; i < 3; i++)
+    {
+        printf("Posicao:  %d  PID : %ld esta em Espera\n \n ", i, prontos[i].pid);
+    }
+}
+
+void removeEspera(){
+
+    espera[0] = psAux;
+    while (espera[0].pid == -1){
+        espera[0] = espera[1];
+        espera[1] = espera[2];
+        espera[2] = vazio;
+    }
+    printf("Um Item FOI REMOVIDO da Espera : \n \n ");
+
+}
+
+void insertEspera(Process p){
+
+    if (espera[0].pid == 0){
+        printf("\n \n Colocu na PRIMEIRA POSICAO \n \n ");
+        espera[0] = p;
+    }
+    else if (espera[1].pid == 0){
+         printf("\n \n Colocu na SEGUNDA POSICAO \n \n ");
+        espera[1] = p;
+    }
+    else{
+         printf("\n \n Colocu na TERCEIRA POSICAO \n \n ");
+        espera[2] = p;
+    }
+}
+
+Process  getPrimeiroProcessoEspera(){
+    return espera[0];
 }
 
 int sumProcessTime(Process p[3])
@@ -114,7 +159,7 @@ int main()
 
     int min = 100000;
     bool t = false;
-    Process p1, p2, p3;
+    Process p1, p2, p3 , eliminado;
     psAux.pid = -1;
     psAux.time = 0;
     psAux.cpu1 = 0;
@@ -203,10 +248,23 @@ int main()
         }
         else
         {
-            printf("O PID : %ld esta FINALIZADO \n \n", exec.pid);
+            printf("O PID : %ld esta FINALIZADO Tempo : %d \n \n", exec.pid,exec.cpu1);
+            // a variavel tempo vai ser quabndo ele vai sair da espera para pronto
+            
+            int tempo = exec.cpu1 + exec.inOut;
+            eliminado = exec;
             exec = psAux;
             listProntos(prontos);
         }
+
+        if (eliminado.pid != 0){
+
+            insertEspera(eliminado);
+
+
+        }
+
+
     }
 }
 
