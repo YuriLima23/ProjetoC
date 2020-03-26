@@ -85,15 +85,15 @@ void listEspera()
 
 void removeEspera(Process p)
 {
-    // for (int i = 0; i < 3; i++)
-    // {
-    //     if (espera[i].pid == p.pid)
-    //     {
-    //         espera[i] = psAux;
-    //         break;
-    //     }
-    // }
-    espera[0] = psAux;
+    for (int i = 0; i < 3; i++)
+    {
+        if (espera[i].pid == p.pid)
+        {
+            espera[i] = psAux;
+            break;
+        }
+    }
+    // espera[0] = psAux;
     while (espera[0].pid == -1)
     {
         espera[0] = espera[1];
@@ -110,20 +110,20 @@ void insertEspera(Process p)
 
     if (espera[0].pid == 0)
     {
-        printf("\n \n Colocu na PRIMEIRA POSICAO \n \n ");
+        
         espera[0] = p;
     }
     else if (espera[1].pid == 0)
     {
-        printf("\n \n Colocu na SEGUNDA POSICAO \n \n ");
+        
         espera[1] = p;
     }
     else
     {
-        printf("\n \n Colocu na TERCEIRA POSICAO \n \n ");
+        
         espera[2] = p;
     }
-    listEspera();
+    
 }
 
 Process getPrimeiroProcessoEspera()
@@ -185,32 +185,30 @@ Process procuraVetorOriginal(Process p)
 
 void verificaEspera(int j)
 {
-
-        if (espera[0].tempoEspera == j)
+    if (espera[0].pid != -1 && espera[0].pid != 0)
+    {
+        bool t;
+        for (int i = 0; i < 3; i++)
         {
-            espera[0].state = true;
-            insertPronto(espera[0]);
-            removeEspera(espera[0]);
-            printf("Entrou no verifica espera posicao 1 \n \n ");
-            
+            if (espera[i].tempoEspera == j && espera[i].cpu1 <= 0)
+            {
+                espera[i].state = true;
+                insertPronto(espera[i]);
+                printf("Entrou no verifica espera posicao %d \n \n ", i);
+            }
         }
-         if (espera[1].tempoEspera == j)
+        //precisa desse segundo for igual pra remover, pq se colocar tudo no mesmo for ele se perde nas posições
+        //ex : quando eu removo da espera todos os itens são realocados então na prox vez que ele for compara os itens ja estão fora do lugar
+        for (int i = 0; i < 3; i++)
         {
-            espera[1].state = true;
-            insertPronto(espera[1]);
-            removeEspera(espera[1]);
-            printf("Entrou no verifica espera posicao 2 \n \n ");
-            
+            if (espera[i].tempoEspera == j && espera[i].cpu1 <= 0)
+            {
+                espera[i].state = true;
+                removeEspera(espera[i]);
+                printf("Entrou no verifica espera 2 posicao %d \n \n ", i);
+            }
         }
-         if (espera[2].tempoEspera == j)
-        {
-            espera[2].state = true;
-            insertPronto(espera[2]);
-            removeEspera(espera[2]);
-            printf("Entrou no verifica espera posicao 3 \n \n ");
-            
-        }
-    
+    }
 }
 Process calculaEspera(Process pa, int j)
 {
@@ -239,7 +237,6 @@ int main()
     p1.tempoEspera = -1;
     p2.tempoEspera = -1;
     p3.tempoEspera = -1;
-
 
     // // Process P1 ==============================
     printf("Digite Tempo de Chegada do Processo P1 :");
@@ -296,7 +293,7 @@ int main()
     for (int i = 0; i <= sumProcessTime(vet); i++)
     {
         printf("\n \n  TEMPO I  : %d \n \n ", i);
-         verificaEspera(i);
+
         if (j == false)
         {
             if (vet[x].time == i)
@@ -355,7 +352,7 @@ int main()
         // aqui começa a segunda parte a CPU2
         if (j == true)
         {
-            printf("\n \n \n ENTROUUUU NA CPU 2 \n\n \n");
+
             if (exec2.pid == psAux.pid)
             {
                 exec2 = getPrimeiroProcesso();
@@ -364,7 +361,7 @@ int main()
 
             if (exec2.cpu2 == 0)
             {
-                printf("O PID : %ld esta FINALIZADO Tempo : %d \n \n", exec2.pid, exec2.cpu2);
+                printf("O PID CPU2 : %ld esta FINALIZADO Tempo : %d \n \n", exec2.pid, exec2.cpu2);
                 exec2 = psAux;
                 if (exec2.pid == psAux.pid)
                 {
@@ -375,14 +372,14 @@ int main()
 
             if (exec2.cpu2 > 0)
             {
-                printf("O PID : %ld esta em execução Tempo : %d \n \n", exec2.pid, exec2.cpu2--);
+                printf("O PID CPU 2 : %ld esta em execução Tempo : %d \n \n", exec2.pid, exec2.cpu2--);
             }
         }
         else
         {
-            
+            verificaEspera(i);
             continue;
         }
-       
+        verificaEspera(i);
     }
 }
