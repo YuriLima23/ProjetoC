@@ -20,9 +20,13 @@ typedef struct
     int tempoEspera;
     bool state;
     int cpu2;
+    int ts;
+    int tmip;
+    int tt;
+    int ttts;
 } Process;
 
-Process vet[3], psAux, vazio;
+Process vet[3], psAux, vazio, dados[3];
 
 Process espera[3], prontos[3];
 
@@ -110,20 +114,19 @@ void insertEspera(Process p)
 
     if (espera[0].pid == 0)
     {
-        
+
         espera[0] = p;
     }
     else if (espera[1].pid == 0)
     {
-        
+
         espera[1] = p;
     }
     else
     {
-        
+
         espera[2] = p;
     }
-    
 }
 
 Process getPrimeiroProcessoEspera()
@@ -171,6 +174,18 @@ void generatorTable(Process p[3])
     printf("| %ld     |     %d           |    %d          |   %d            |   %d            ||\n", p[1].pid, p[1].time, p[1].cpu1, p[1].inOut, p[1].cpu2);
     printf("| %ld     |     %d           |    %d          |   %d            |   %d            ||\n", p[2].pid, p[2].time, p[2].cpu1, p[2].inOut, p[2].cpu2);
 }
+void frameInfo(Process p[3])
+{
+
+    printf("+--------+-----+--------+--------+---|\n");
+    printf("| .::Informações To processamento ::.|\n");
+    printf("+--------+-----+--------+--------+---|\n");
+    printf("| PID | TC | TS | TMIP | TT | TT/TS |\n");
+    printf("|-----|---------|------|----|-------|\n");
+    printf("| %ld | %d | %d |  %d  | %d |   %d  |\n", vet[0].pid, vet[0].time, vet[0].ts, vet[0].tmip, vet[0].tt, vet[0].ttts);
+    printf("| %ld | %d | %d |  %d  | %d |   %d  |\n", vet[1].pid, vet[1].time, vet[1].ts, vet[1].tmip, vet[1].tt, vet[1].ttts);
+    printf("| %ld | %d | %d |  %d  | %d |   %d  |\n", vet[2].pid, vet[2].time, vet[2].ts, vet[2].tmip, vet[2].tt, vet[2].ttts);
+}
 
 Process procuraVetorOriginal(Process p)
 {
@@ -215,6 +230,45 @@ Process calculaEspera(Process pa, int j)
     pa.tempoEspera = pa.inOut + j;
     return pa;
 }
+ // ================================================ Revisão Professor  ====================================
+Process calculaTmip(Process p, int tempI)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        if (vet[i].pid == p.pid)
+        {
+            vet[i].tmip = tempI - vet[i].time;
+            printf("ola : %d \n \n \n ",vet[i].tmip);
+            break;
+        }
+    }
+}
+
+Process calculaTT(Process p, int fimT)
+{
+    float valor = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        if (vet[i].pid == p.pid)
+        {
+            // professor tem que verificar isso
+            valor = sumProcessTime(vet) / 3;
+            vet[i].tt = (fimT - vet[i].time);
+            break;
+        }
+    }
+}
+
+Process calculTtts()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        vet[i].ttts = vet[i].tt / vet[i].ts;
+        break;
+    }
+}
+
+// ====================================== End Revisão =======================================
 
 int main()
 {
@@ -231,6 +285,23 @@ int main()
     p1.pid = rand() % 10000;
     p2.pid = rand() % 10000;
     p3.pid = rand() % 10000;
+
+    p1.ts = 0;
+    p2.ts = 0;
+    p3.ts = 0;
+
+    p1.tmip = 0;
+    p2.tmip = 0;
+    p3.tmip = 0;
+
+    p1.tt = 0;
+    p2.tt = 0;
+    p3.tt = 0;
+
+    p1.ttts = 0;
+    p2.ttts = 0;
+    p3.ttts = 0;
+
     p1.state = false;
     p2.state = false;
     p3.state = false;
@@ -290,6 +361,9 @@ int main()
     eliminado.pid = 0;
     exec = psAux;
     exec2 = psAux;
+    int m = 0;
+    int l = 0;
+    int o = 0;
     for (int i = 0; i <= sumProcessTime(vet); i++)
     {
         printf("\n \n  TEMPO I  : %d \n \n ", i);
@@ -312,6 +386,17 @@ int main()
                 if (exec.pid == psAux.pid)
                 {
                     exec = getPrimeiroProcesso();
+                    // Calcula TMIP -------
+                    calculaTmip(exec, i);
+
+                    // End TMIP ------
+                    // calcula tempo de processaento medio
+                    if (o < 3)
+                    {
+
+                        dados[o].tmip = i - exec.time;
+                    }
+                    o++;
                     removePronto();
                 }
             }
@@ -320,6 +405,7 @@ int main()
             {
                 printf("O PID : %ld esta FINALIZADO Tempo : %d \n \n", exec.pid, exec.cpu1);
                 // a variavel tempo vai ser quabndo ele vai sair da espera para pronto
+
                 eliminado = exec;
                 exec = psAux;
                 if (eliminado.pid != 0)
@@ -356,12 +442,14 @@ int main()
             if (exec2.pid == psAux.pid)
             {
                 exec2 = getPrimeiroProcesso();
+
                 removePronto(exec2);
             }
 
             if (exec2.cpu2 == 0)
             {
                 printf("O PID CPU2 : %ld esta FINALIZADO Tempo : %d \n \n", exec2.pid, exec2.cpu2);
+
                 exec2 = psAux;
                 if (exec2.pid == psAux.pid)
                 {
@@ -373,6 +461,8 @@ int main()
             if (exec2.cpu2 > 0)
             {
                 printf("O PID CPU 2 : %ld esta em execução Tempo : %d \n \n", exec2.pid, exec2.cpu2--);
+                //tentando calcular o Turnaround Time
+                calculaTT(exec, i);
             }
         }
         else
@@ -382,4 +472,15 @@ int main()
         }
         verificaEspera(i);
     }
+
+    //calculo  tempo de serviço TS
+    vet[0].ts = vet[0].cpu1 + vet[0].cpu2;
+    vet[1].ts = vet[1].cpu1 + vet[1].cpu2;
+    vet[2].ts = vet[2].cpu1 + vet[2].cpu2;
+
+    calculTtts();
+
+    // end tempo serviço
+// tabela final 
+    frameInfo(vet);
 }
