@@ -21,9 +21,9 @@ typedef struct
     bool state;
     int cpu2;
     int ts;
-    int tmip;
-    int tt;
-    int ttts;
+    float tmip;
+    float tt;
+    float ttts;
 } Process;
 
 Process vet[3], psAux, vazio, dados[3];
@@ -180,11 +180,11 @@ void frameInfo(Process p[3])
     printf("+--------+-----+--------+--------+---|\n");
     printf("| .::Informações To processamento ::.|\n");
     printf("+--------+-----+--------+--------+---|\n");
-    printf("| PID | TC | TS | TMIP | TT | TT/TS |\n");
-    printf("|-----|---------|------|----|-------|\n");
-    printf("| %ld | %d | %d |  %d  | %d |   %d  |\n", vet[0].pid, vet[0].time, vet[0].ts, vet[0].tmip, vet[0].tt, vet[0].ttts);
-    printf("| %ld | %d | %d |  %d  | %d |   %d  |\n", vet[1].pid, vet[1].time, vet[1].ts, vet[1].tmip, vet[1].tt, vet[1].ttts);
-    printf("| %ld | %d | %d |  %d  | %d |   %d  |\n", vet[2].pid, vet[2].time, vet[2].ts, vet[2].tmip, vet[2].tt, vet[2].ttts);
+    printf("| PID | TC | TS | TMIP | TT   | TT/TS |\n");
+    printf("|-----|---------|------|------|-------|\n");
+    printf("| %ld | %d | %d |  %2f  | %2f |   %3f  |\n", vet[0].pid, vet[0].time, vet[0].ts, vet[0].tmip, vet[0].tt, vet[0].ttts);
+    printf("| %ld | %d | %d |  %2f  | %2f |   %3f  |\n", vet[1].pid, vet[1].time, vet[1].ts, vet[1].tmip, vet[1].tt, vet[1].ttts);
+    printf("| %ld | %d | %d |  %2f  | %2f |   %3f  |\n", vet[2].pid, vet[2].time, vet[2].ts, vet[2].tmip, vet[2].tt, vet[2].ttts);
 }
 
 Process procuraVetorOriginal(Process p)
@@ -233,24 +233,22 @@ Process calculaEspera(Process pa, int j)
 // ================================================ Revisão Professor  ====================================
 void calculaTmip(Process p, int tempI)
 {
-    printf("tempo teste %d", tempI);
+    
     for (int i = 0; i < 3; i++)
     {
-        int t = 0;
+        
         if (vet[i].pid == p.pid)
         {
+            // precisa disso pq o primeiro processo é calculado 2 vezes devido ao codigo mal feito 
+            //então eu coloco -1 no inicio e se for diferente de -1 então ele ja foi calculado e só ignora 
             if (vet[i].tmip == -1)
             {
                 vet[i].tmip = tempI - vet[i].time;
-                printf("ola : %d \n \n \n ", vet[i].tmip);
-                t++;
+               
                 break;
             }
         }
-        if (t == 0)
-        {
-            printf(" Naẽooo entrouuuu no calcula TMIP: \n \n \n ");
-        }
+      
     }
 }
 
