@@ -230,21 +230,31 @@ Process calculaEspera(Process pa, int j)
     pa.tempoEspera = pa.inOut + j;
     return pa;
 }
- // ================================================ Revisão Professor  ====================================
-Process calculaTmip(Process p, int tempI)
+// ================================================ Revisão Professor  ====================================
+void calculaTmip(Process p, int tempI)
 {
+    printf("tempo teste %d", tempI);
     for (int i = 0; i < 3; i++)
     {
+        int t = 0;
         if (vet[i].pid == p.pid)
         {
-            vet[i].tmip = tempI - vet[i].time;
-            printf("ola : %d \n \n \n ",vet[i].tmip);
-            break;
+            if (vet[i].tmip == -1)
+            {
+                vet[i].tmip = tempI - vet[i].time;
+                printf("ola : %d \n \n \n ", vet[i].tmip);
+                t++;
+                break;
+            }
+        }
+        if (t == 0)
+        {
+            printf(" Naẽooo entrouuuu no calcula TMIP: \n \n \n ");
         }
     }
 }
 
-Process calculaTT(Process p, int fimT)
+void calculaTT(Process p, int fimT)
 {
     float valor = 0;
     for (int i = 0; i < 3; i++)
@@ -252,19 +262,19 @@ Process calculaTT(Process p, int fimT)
         if (vet[i].pid == p.pid)
         {
             // professor tem que verificar isso
-            valor = sumProcessTime(vet) / 3;
             vet[i].tt = (fimT - vet[i].time);
             break;
         }
     }
 }
 
-Process calculTtts()
+void calculTtts()
 {
     for (int i = 0; i < 3; i++)
     {
+        
         vet[i].ttts = vet[i].tt / vet[i].ts;
-        break;
+        
     }
 }
 
@@ -290,9 +300,9 @@ int main()
     p2.ts = 0;
     p3.ts = 0;
 
-    p1.tmip = 0;
-    p2.tmip = 0;
-    p3.tmip = 0;
+    p1.tmip = -1;
+    p2.tmip = -1;
+    p3.tmip = -1;
 
     p1.tt = 0;
     p2.tt = 0;
@@ -388,15 +398,9 @@ int main()
                     exec = getPrimeiroProcesso();
                     // Calcula TMIP -------
                     calculaTmip(exec, i);
-
                     // End TMIP ------
-                    // calcula tempo de processaento medio
-                    if (o < 3)
-                    {
 
-                        dados[o].tmip = i - exec.time;
-                    }
-                    o++;
+                    // calcula tempo de processaento medio
                     removePronto();
                 }
             }
@@ -416,6 +420,7 @@ int main()
                 if (exec.pid == psAux.pid)
                 {
                     exec = getPrimeiroProcesso();
+                    calculaTmip(exec, i);
                     if (exec.state == true)
                     {
                         j = true;
@@ -448,21 +453,22 @@ int main()
 
             if (exec2.cpu2 == 0)
             {
-                printf("O PID CPU2 : %ld esta FINALIZADO Tempo : %d \n \n", exec2.pid, exec2.cpu2);
-
+                printf("O PID CPU 2 : %ld esta FINALIZADO Tempo : %d \n \n", exec2.pid, exec2.cpu2);
+                calculaTT(exec2, i);
                 exec2 = psAux;
                 if (exec2.pid == psAux.pid)
                 {
                     exec2 = getPrimeiroProcesso();
                     removePronto(exec2);
                 }
+
             }
 
             if (exec2.cpu2 > 0)
             {
                 printf("O PID CPU 2 : %ld esta em execução Tempo : %d \n \n", exec2.pid, exec2.cpu2--);
                 //tentando calcular o Turnaround Time
-                calculaTT(exec, i);
+                
             }
         }
         else
@@ -481,6 +487,6 @@ int main()
     calculTtts();
 
     // end tempo serviço
-// tabela final 
+    // tabela final
     frameInfo(vet);
 }
